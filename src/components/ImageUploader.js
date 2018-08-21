@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import ReactToPrint from "react-to-print";
 
 export default class extends Component {
   constructor(props) {
@@ -8,7 +9,8 @@ export default class extends Component {
       originalImage: "",
       preview: "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D",
       width: 800,
-      height: 100
+      height: 100,
+      notSaved: true
     };
     this.fileChangedHandler = this.fileChangedHandler.bind(this);
     this.uploadHandler = this.uploadHandler.bind(this);
@@ -86,7 +88,7 @@ export default class extends Component {
     event.preventDefault();
     const croppedImage = this.crop();
     const previewUrl = await this.saveImage(croppedImage);
-    this.setState({ preview: previewUrl });
+    this.setState({ preview: previewUrl, notSaved: false });
   }
 
   widthChange(event) {
@@ -106,6 +108,17 @@ export default class extends Component {
       <div>
         <input ref="fileInput" type="file" onChange={this.fileChangedHandler} />
         <button onClick={this.clearInput.bind(this)}>Clear</button>
+        <ReactToPrint
+          trigger={() => (
+            <button
+              disabled={this.state.notSaved}
+              onClick={this.clearInput.bind(this)}
+            >
+              Print Preview
+            </button>
+          )}
+          content={() => this.componentRef}
+        />
         <form onSubmit={this.uploadHandler}>
           Dimensions: Width
           <input
@@ -130,7 +143,16 @@ export default class extends Component {
           alt="upload"
           style={{ display: "none" }}
         />
-        <img src={this.state.preview} alt="no" />
+        <img
+          src={this.state.preview}
+          alt="no"
+          ref={el => (this.componentRef = el)}
+          style={{
+            display: "block",
+            marginLeft: "auto",
+            marginRight: "auto"
+          }}
+        />
       </div>
     );
   }
