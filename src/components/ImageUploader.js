@@ -7,7 +7,7 @@ export default class extends Component {
 
     this.state = {
       originalImage: "",
-      selectedFile: "",
+      selectedFile: "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D",
       width: 800,
       height: 100
     };
@@ -60,7 +60,16 @@ export default class extends Component {
     return URL.createObjectURL(i);
   }
 
+  saveImage(imageFile) {
+    return Promise.resolve("http://lorempixel.com/800/100/cats/");
+  }
+
   fileChangedHandler(event) {
+    if (event.target.files[0].size > 1024 * 1024) {
+      alert("Image cannot be larget than 1 MB");
+      event.target.value = "";
+      return;
+    }
     this.getBase64(event.target.files[0], file => {
       this.setState({ selectedFile: file });
       this.setState({ originalImage: file });
@@ -90,8 +99,6 @@ export default class extends Component {
   }
 
   render() {
-    console.log("here");
-
     return (
       <div>
         <input type="file" onChange={this.fileChangedHandler} />
@@ -117,10 +124,7 @@ export default class extends Component {
           alt="upload"
           style={{ display: "none" }}
         />
-        <img
-          src={this.state.selectedFile}
-          alt="upload"
-        />
+        <img src={this.state.selectedFile} alt="upload" />
       </div>
     );
   }
