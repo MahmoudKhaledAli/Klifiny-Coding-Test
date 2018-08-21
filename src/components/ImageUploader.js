@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import ImageLoader from "react-image-file";
 
 export default class extends Component {
   constructor(props) {
@@ -7,13 +6,12 @@ export default class extends Component {
 
     this.state = {
       originalImage: "",
-      selectedFile: "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D",
+      preview: "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D",
       width: 800,
       height: 100
     };
     this.fileChangedHandler = this.fileChangedHandler.bind(this);
     this.uploadHandler = this.uploadHandler.bind(this);
-    this.updatePreview = this.updatePreview.bind(this);
   }
 
   getBase64(file, cb) {
@@ -28,9 +26,9 @@ export default class extends Component {
   }
 
   resizeCrop(src, width, height) {
-    var crop = width == 0 || height == 0;
+    var crop = width === 0 || height === 0;
     // not resize
-    if (src.width <= width && height == 0) {
+    if (src.width <= width && height === 0) {
       width = src.width;
       height = src.height;
     }
@@ -70,24 +68,25 @@ export default class extends Component {
       event.target.value = "";
       return;
     }
-    this.getBase64(event.target.files[0], file => {
-      this.setState({ selectedFile: file });
-      this.setState({ originalImage: file });
+    this.getBase64(event.target.files[0], base64 => {
+      this.setState({ originalImage: base64 });
     });
   }
 
-  updatePreview() {
+  crop() {
     var mybase64resized = this.resizeCrop(
       this.refs.orgImage,
       this.state.width,
       this.state.height
     ).toDataURL("image/jpg", 90);
-    this.setState({ selectedFile: mybase64resized });
+    return mybase64resized;
   }
 
-  uploadHandler(event) {
+  async uploadHandler(event) {
     event.preventDefault();
-    this.updatePreview();
+    const croppedImage = this.crop();
+    const previewUrl = await this.saveImage(croppedImage);
+    this.setState({ preview: previewUrl });
   }
 
   widthChange(event) {
@@ -108,12 +107,14 @@ export default class extends Component {
             type="number"
             max="800"
             onChange={this.widthChange.bind(this)}
+            value={this.state.width}
           />
           x Height
           <input
             type="number"
             max="100"
             onChange={this.heightChange.bind(this)}
+            value={this.state.height}
           />
           <button type="submit">Upload!</button>
         </form>
@@ -124,7 +125,7 @@ export default class extends Component {
           alt="upload"
           style={{ display: "none" }}
         />
-        <img src={this.state.selectedFile} alt="upload" />
+        <img src={this.state.preview} alt="no" />
       </div>
     );
   }
