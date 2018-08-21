@@ -97,10 +97,15 @@ export default class extends Component {
     this.setState({ height: event.target.value });
   }
 
+  clearInput(event) {
+    this.refs.fileInput.value = "";
+  }
+
   render() {
     return (
       <div>
-        <input type="file" onChange={this.fileChangedHandler} />
+        <input ref="fileInput" type="file" onChange={this.fileChangedHandler} />
+        <button onClick={this.clearInput.bind(this)}>Clear</button>
         <form onSubmit={this.uploadHandler}>
           Dimensions: Width
           <input
